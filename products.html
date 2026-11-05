@@ -1,0 +1,17 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Products</title><link rel="stylesheet" href="style9.css"></head>
+<link rel="stylesheet" href="css.css">
+<a href="sky.html">Home</a>
+<body><header><div class="top"><div style="display:flex;align-items:center;gap:10px"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><button class="btn" style="width:auto;padding:8px 18px" onclick="location.href='account.html'">My Account</button></div><nav><a href="index.html">Home</a><a href="products.html" class="active">Products</a><a href="order.html">Order</a><a href="account.html">My Account</a><a href="withdraw.html">Withdraw</a><a href="supplier.html">Supplier</a><a href="admin.html">Admin</a><a href="return.html">Return</a></nav></header>
+<div class="search-box"><input id="searchInput" placeholder="Search..."><button onclick="filterProducts()">Search</button></div>
+<div class="sec"><div style="display:flex;gap:8px;overflow-x:auto"><button class="btn" style="width:auto" onclick="filterCat('all')">All</button><button class="btn btn-outline" style="width:auto" onclick="filterCat('shoe')">Shoes</button><button class="btn btn-outline" style="width:auto" onclick="filterCat('kurta')">Kurta</button><button class="btn btn-outline" style="width:auto" onclick="filterCat('watch')">Watch</button></div><br><div class="grid" id="productGrid"></div></div>
+<script>
+let defaults=[{code:'P001',name:'Women Kurta Set',price:4000,img:'pic1.jpg',shop:'Sky Official',cat:'kurta'},{code:'P002',name:'Smart Watch',price:2300,img:'BNB.jpg',shop:'Sky Official',cat:'watch'},{code:'P003',name:'Nike Air Shoes',price:2800,img:'https://raw.githubusercontent.com/USERNAME/sky-images/main/part%20c14.jpg',shop:'Bilal Shoes',cat:'shoe'}];
+let sup=JSON.parse(localStorage.getItem('supplierProducts')||'[]').filter(p=>p.status.includes('Approved')).map(p=>({code:p.id,name:p.productName,price:p.resellerPrice+500,img:p.image,shop:p.shopName,cat:p.category.toLowerCase()}));
+let all=[...defaults,...sup];
+function render(list){document.getElementById('productGrid').innerHTML=list.map(p=>`<div class="card product" data-name="${p.name.toLowerCase()}"><img src="${p.img}"><div class="pad"><h3>${p.name}</h3><p>By ${p.shop} • ${p.code}</p><div class="price">Rs. ${p.price} <s>Rs. ${p.price+400}</s></div><div class="profit">+ Rs. 500 Profit</div><button class="btn" onclick="orderNow('${p.code}','${p.name}','${p.price-500}')">Order</button><button class="btn btn-outline" onclick="shareP('${p.name}')">Share on WhatsApp</button></div></div>`).join('');}
+function filterProducts(){let q=document.getElementById('searchInput').value.toLowerCase();render(all.filter(p=>p.name.toLowerCase().includes(q)));}
+function filterCat(c){if(c=='all')render(all);else render(all.filter(p=>p.cat.includes(c)));}
+function orderNow(code,name,price){localStorage.setItem('selectedProduct',JSON.stringify({code,name,price}));location.href='order.html';}
+function shareP(n){window.open("https://wa.me/?text="+encodeURIComponent("Sky Shopping: "+n+" - Order karo!"));}
+render(all);let sq=localStorage.getItem('searchQ');if(sq){document.getElementById('searchInput').value=sq;filterProducts();localStorage.removeItem('searchQ');}
+</script></body></html>
