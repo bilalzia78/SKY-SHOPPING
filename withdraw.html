@@ -1,0 +1,9 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Withdraw</title><link rel="stylesheet" href="css.css"></head>
+<body><header><div class="top"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><nav><a href="index.html">Home</a><a href="account.html">My Account</a><a href="withdraw.html" class="active">Withdraw</a></nav></header>
+<div class="form-box"><h2>💸 Withdraw Money</h2><p>Balance: <b id="bal">Rs. 0</b> • Min Withdraw Rs. 500</p>
+<input id="wAmt" type="number" placeholder="Amount - Ex: 1000"><input id="wAcc" placeholder="JazzCash / EasyPaisa Number"><select id="wMethod"><option>JazzCash</option><option>EasyPaisa</option><option>Bank Transfer</option></select><button class="btn btn-gold" onclick="doWithdraw()">Request Withdraw</button><div id="wHist" style="margin-top:15px"></div><p style="font-size:12px;color:#666;margin-top:10px">Withdraw 24 hours me process hoga. Fail hone par amount wapis balance me aa jayega.</p></div>
+<script>
+let orders=JSON.parse(localStorage.getItem('orders')||'[]');let tp=orders.reduce((s,o)=>s+parseInt(o.profit||500),0);document.getElementById('bal').innerText='Rs. '+tp;
+let hist=JSON.parse(localStorage.getItem('withdraws')||'[]');document.getElementById('wHist').innerHTML='<h3>History</h3>'+hist.map(h=>`<p>${h.amount} - ${h.account} - ${h.status}</p>`).join('');
+async function doWithdraw(){let amt=document.getElementById('wAmt').value,acc=document.getElementById('wAcc').value;if(amt<500)return alert('Min 500');let data={amount:amt,account:acc,status:'Pending',date:new Date().toLocaleString()};hist.push(data);localStorage.setItem('withdraws',JSON.stringify(hist));try{await fetch('http://localhost:8080/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});}catch(e){}alert('Withdraw Request Sent! 24h me payment');location.reload();}
+</script></body></html>
