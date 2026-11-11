@@ -1,0 +1,60 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sky Shopping - Markaz Style</title>
+<link rel="stylesheet" href="style9.css"><link rel="stylesheet" href="css.css">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+</head>
+<body>
+<header><div class="top"><div style="display:flex;align-items:center;gap:10px"><div class="logo"></div><h1>SKY <span>SHOPPING</span></h1></div><button class="btn" style="width:auto;padding:8px 18px" onclick="location.href='supplier.html'">Become Supplier</button></div>
+<nav><a href="index.html" class="active">Home</a><a href="products.html">Products</a><a href="order.html">Order</a><a href="Account.html">My Account</a><a href="withdraw.html">Withdraw</a><a href="supplier.html">Supplier</a><a href="admin.html">Admin</a><a href="return.html">Return</a><a href="help.html">Help</a></nav></header>
+
+<div class="hero"><h2>Pakistan Ka Apna<br>Markaz - Earn From Home</h2><p>Zero Investment • Daily Profit • 24h Payment • Supplier Bano Ya Reseller Bano</p><button onclick="location.href='products.html'">🛍️ Products Dekho</button><button onclick="location.href='#join'" style="background:#fff">🚀 Join as Reseller</button></div>
+
+<div class="search-box"><input id="searchInput" placeholder="Search Shoes, Kurta, Watch..."><button onclick="doSearch()">Search</button></div>
+
+<div class="sec"><h2>🔥 Trending Products</h2><div class="grid" id="homeGrid">Loading products...</div></div>
+
+<div class="sec"><h2>⭐ Resellers Reviews</h2><div class="grid"><div class="card"><div class="pad">★★★★★<p>"Pehle mahine 22,000 kamaya, payment time par mili."</p><b>- Ayesha, Lahore</b></div></div><div class="card"><div class="pad">★★★★★<p>"Shoe wala hun, Sky par product lagaya, daily 5 orders."</p><b>- Bilal Shoes, Lahore</b></div></div><div class="card"><div class="pad">★★★★★<p>"Return bhi easy hai, customer khush."</p><b>- Sana, Karachi</b></div></div></div></div>
+
+<div class="sec" id="join"><div class="form-box"><h2>🚀 Become Reseller - Free Join</h2><p style="font-size:13px;color:#666">Form bharein, 24h me contact karenge.</p>
+<form id="resellerForm"><input name="fullName" placeholder="Full Name" required><input name="whatsapp" placeholder="WhatsApp 03xx..." required><input name="email" type="email" placeholder="Email" required><input name="city" placeholder="City" required><textarea name="address" placeholder="Full Address" required></textarea><input name="accountNumber" placeholder="JazzCash / EasyPaisa Number" required><button class="btn btn-gold">Apply Now - FREE</button><p id="msg"></p></form></div></div>
+
+<footer><h3>SKY SHOPPING</h3><p>support@skyshopping109@gmail.com | Lahore, Pakistan</p><p>© 2026 Sky Shopping - Markaz Style Platform</p></footer>
+<script>
+let defaultProducts=[
+  {code:'P001',name:'Women Kurta Set',price:4000,img:'pic1.jpg',shop:'Sky Official'},
+  {code:'P002',name:'Smart Watch',price:2300,img:'BNB.jpg',shop:'Sky Official'},
+  {code:'P003',name:'Nike Air Shoes',price:2800,img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600',shop:'Bilal Shoes'}
+];
+
+async function loadHome(){
+  let all=[...defaultProducts];
+  try{
+    let snap=await db.collection('sky_products').where('status','==','Approved').get();
+    snap.forEach(d=>{
+      let p=d.data();
+      // ✅ FIX: Ab Supplier Price me 500 add nahi hoga. Jo Supplier ne price rakha hai wahi dikhega.
+      let customerPrice = p.price || p.supplierPrice || 0;
+      all.push({code:d.id, name:p.name, price:customerPrice, img:p.img, shop:p.supplierName || p.supplier || 'Sky Supplier', supplierPrice:p.supplierPrice || p.price, docId:d.id});
+    });
+  }catch(e){ console.log('Firebase error',e); }
+  // ✅ FIX: Profit 500 wala box hata diya, kaata hua price bhi hata diya
+  document.getElementById('homeGrid').innerHTML=all.map(p=>`<div class="card"><img src="${p.img}" onerror="this.src='https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600'"><div class="pad"><h3>${p.name}</h3><p>By ${p.shop} • Code ${p.code}</p><div class="price">Rs. ${p.price}</div><button class="btn" onclick="orderNow('${p.docId||p.code}','${p.name}','${p.price}','${p.price}')">Order Now</button></div></div>`).join('');
+}
+function orderNow(docId,name,supplierPrice,price){
+  if(docId && docId.length>10){ location.href=`order.html?product=${docId}&price=${price}`; }
+  else { localStorage.setItem('selectedProduct',JSON.stringify({code:docId,name,price:supplierPrice})); location.href='order.html'; }
+}
+function doSearch(){localStorage.setItem('searchQ',document.getElementById('searchInput').value);location.href='products.html';}
+
+document.getElementById('resellerForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  let data=Object.fromEntries(new FormData(e.target).entries());
+  data.createdAt=Date.now(); data.type='reseller';
+  try{ await db.collection('sky_resellers').add(data); }catch(err){ console.log(err); }
+  localStorage.setItem('userName',data.fullName);
+  document.getElementById('msg').innerText='✅ Saved! Welcome to Sky Shopping - Admin aap se contact karega';
+  setTimeout(()=>location.href='products.html',800);
+});
+loadHome();
+</script></body></html>
